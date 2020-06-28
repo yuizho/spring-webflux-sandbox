@@ -10,7 +10,7 @@ import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 import java.time.Duration
 
-class SseHandler(private val queueOperation: QueueOperation) {
+class SimpleSseHandler(private val queueOperation: QueueOperation) {
     fun post(request: ServerRequest): Mono<ServerResponse> {
         return request.bodyToMono<Message>()
                 .flatMap { queueOperation.push(it) }

@@ -1,6 +1,6 @@
 package com.github.yuizho.webfluxsandbox
 
-import com.github.yuizho.webfluxsandbox.controllers.SseHandler
+import com.github.yuizho.webfluxsandbox.controllers.SimpleSseHandler
 import com.github.yuizho.webfluxsandbox.domain.QueueOperation
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -11,15 +11,15 @@ import org.springframework.web.reactive.function.server.router
 @Configuration
 class SseConfig {
     @Bean
-    fun routes(sseHandler: SseHandler): RouterFunction<ServerResponse> {
+    fun routes(simpleSseHandler: SimpleSseHandler): RouterFunction<ServerResponse> {
         return router {
-            GET("/channel") { sseHandler.channel(it) }
-            POST("/post") { sseHandler.post(it) }
+            GET("/simple/channel") { simpleSseHandler.channel(it) }
+            POST("/simple/post") { simpleSseHandler.post(it) }
         }
     }
 
     @Bean
-    fun sseHandler(queueOperation: QueueOperation): SseHandler {
-        return SseHandler(queueOperation)
+    fun simpleSseHandler(queueOperation: QueueOperation): SimpleSseHandler {
+        return SimpleSseHandler(queueOperation)
     }
 }
