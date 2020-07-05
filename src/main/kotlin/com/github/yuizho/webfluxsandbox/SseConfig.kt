@@ -42,7 +42,7 @@ class SseConfig {
     fun redisStreamRoutes(redisStreamSseHandler: RedisStreamSseHandler): RouterFunction<ServerResponse> {
         return router {
             GET("/redis-stream/channel/{id}") { redisStreamSseHandler.channel(it) }
-            POST("/redis=stream/post") { redisStreamSseHandler.post(it) }
+            POST("/redis-stream/post") { redisStreamSseHandler.post(it) }
         }
     }
 

@@ -3,7 +3,6 @@ package com.github.yuizho.webfluxsandbox.controllers
 import com.github.yuizho.webfluxsandbox.domain.ChannelMessage
 import org.springframework.data.redis.connection.stream.MapRecord
 import org.springframework.data.redis.connection.stream.StreamOffset
-import org.springframework.data.redis.connection.stream.StreamRecords
 import org.springframework.data.redis.core.ReactiveRedisOperations
 import org.springframework.data.redis.stream.StreamReceiver
 import org.springframework.http.codec.ServerSentEvent
@@ -22,12 +21,8 @@ class RedisStreamSseHandler(
 
     fun post(request: ServerRequest): Mono<ServerResponse> {
         return request.bodyToMono<ChannelMessage>()
-                .flatMap {
-                    Mono.just(
-                            StreamRecords.newRecord()
-                                    .`in`(REDIS_CHANNEL)
-                                    .ofObject(it)
-                    )
+                .map {
+                    MapRecord.create(REDIS_CHANNEL, mapOf("to" to it.to, "value" to it.value))
                 }
                 .flatMap { reactiveRedisOperations.opsForStream<String, ChannelMessage>().add(it) }
                 .flatMap { ServerResponse.ok().body(Mono.just("pushed to redis"), String::class.java) }
@@ -38,7 +33,7 @@ class RedisStreamSseHandler(
         return ServerResponse
                 .ok()
                 .body(streamReceiver.receive(StreamOffset.fromStart(REDIS_CHANNEL))
-                        .map { ChannelMessage(it.value.get("to")!!, it.value.get("value")!!) }
+                        .map { ChannelMessage(it.value["to"]!!, it.value["value"]!!) }
                         .log("before filtering on channel $channelId")
                         .filter { channelId == it.to }
                         .log("after filtering on channel $channelId")
